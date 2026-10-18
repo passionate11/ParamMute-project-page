@@ -114,7 +114,7 @@
       "name": "CoFaithfulQA",
       "alternateName": "CoConflictQA",
       "description": "CoFaithfulQA (Consistency-filtered Contextual Faithfulness QA) is a benchmark for evaluating whether LLMs follow accurate retrieved evidence when it conflicts with their own parametric knowledge. It is built from six open-domain QA datasets (NQ, SQuAD, NewsQA, TriviaQA, SearchQA, HotpotQA) using self-consistency filtering and two-model conflict verification.",
-      "url": "https://huggingface.co/datasets/chengpingan/CoConflictQA",
+      "url": "https://huggingface.co/datasets/chengpingan/CoFaithfulQA",
       "creator": { "@id": "https://passionate11.github.io/#person" },
       "subjectOf": { "@id": "https://passionate11.github.io/ParamMute-project-page/#paper" }
     }
@@ -385,7 +385,7 @@
         </tbody>
       </table>
     </div>
-    <p class="tnote">The test data is on Hugging Face as <a href="https://huggingface.co/datasets/chengpingan/CoConflictQA" target="_blank" rel="noopener">chengpingan/CoConflictQA</a> (the benchmark's earlier name).</p>
+    <p class="tnote">The test data is on Hugging Face as <a href="https://huggingface.co/datasets/chengpingan/CoFaithfulQA" target="_blank" rel="noopener">chengpingan/CoFaithfulQA</a> (formerly released as CoConflictQA).</p>
   </div>
 </section>
 
@@ -565,7 +565,7 @@
     <h2 class="kicker">中文简介</h2>
     <p><strong>ParamMute：通过抑制知识关键的前馈层实现忠实的检索增强生成</strong>（NeurIPS 2025），第一作者为东北大学黄鹏程（Pengcheng Huang），通讯作者为刘正皓，合作单位包括清华大学、微软亚洲研究院和卡内基梅隆大学。</p>
     <p>检索增强生成（RAG）中，即使检索到的文档准确且相关，大模型仍可能依据自身参数中记忆的知识作答，与上下文矛盾，这称为“不忠实生成”或知识冲突。论文发现，不忠实回答出现时，模型中后层的一小部分前馈网络（FFN）激活明显偏高，并通过相关性分析和因果干预验证了这一点，将这些层称为 UA-FFNs（与不忠实相关的 FFN）。</p>
-    <p>ParamMute 分两步：先抑制 UA-FFNs 的激活（LLaMA3-8B-Instruct 上抑制 8 层，系数 λ=0），削弱参数知识的干扰；再训练一个即插即用的适配模块，用知识增强训练和最大间隔的知识偏好损失，让模型更依赖外部证据。论文同时构建了 <strong>CoFaithfulQA</strong> 基准（Hugging Face 上名为 CoConflictQA），从 NQ、SQuAD、NewsQA、TriviaQA、SearchQA、HotpotQA 六个数据集中筛选模型自身知识与证据真实冲突的样本。</p>
+    <p>ParamMute 分两步：先抑制 UA-FFNs 的激活（LLaMA3-8B-Instruct 上抑制 8 层，系数 λ=0），削弱参数知识的干扰；再训练一个即插即用的适配模块，用知识增强训练和最大间隔的知识偏好损失，让模型更依赖外部证据。论文同时构建了 <strong>CoFaithfulQA</strong> 基准（曾以 CoConflictQA 之名发布于 Hugging Face），从 NQ、SQuAD、NewsQA、TriviaQA、SearchQA、HotpotQA 六个数据集中筛选模型自身知识与证据真实冲突的样本。</p>
     <p>实验中，相比普通 RAG，ParamMute 在 CoFaithfulQA 上平均上下文召回率（ConR）提升 6.17 个点、参数记忆召回率（MemR）从 10.89 降到 6.18；在 ConFiQA 上 ConR 平均提升 54.63 个点。该工作的 arXiv 早期版本标题为 PIP-KAG。代码见 GitHub OpenBMB/ParamMute。</p>
   </div>
 </section>

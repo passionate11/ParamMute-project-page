@@ -5,7 +5,7 @@
 - Problem: unfaithful generation in RAG, where the answer contradicts relevant, accurate retrieved context because the LLM falls back on its internal knowledge (knowledge conflict).
 - Finding: unfaithful answers coincide with over-activation of a few mid-to-deep FFN layers (about 70%-90% relative depth); suppressing them makes unfaithful answers less likely.
 - Method: (1) suppress UA-FFN activations with a coefficient lambda; (2) train a plug-and-play adaptation module with knowledge-augmented fine-tuning plus a max-margin knowledge-preference loss. The suppression strength can be adjusted at inference time to control reliance on parametric knowledge.
-- Benchmark: CoFaithfulQA (released on Hugging Face as CoConflictQA), natural knowledge conflicts built from NQ, SQuAD, NewsQA, TriviaQA, SearchQA and HotpotQA; also evaluated on ConFiQA and FaithEval.
+- Benchmark: CoFaithfulQA (formerly released on Hugging Face as CoConflictQA), natural knowledge conflicts built from NQ, SQuAD, NewsQA, TriviaQA, SearchQA and HotpotQA; also evaluated on ConFiQA and FaithEval.
 - Models: main backbone LLaMA3-8B-Instruct (8 of 32 FFN layers muted); the appendix extends to LLaMA3.2 (1B, 3B) and Qwen2.5 (0.5B-14B) Instruct.
 
 ## Links
@@ -14,7 +14,7 @@
 - [Paper (arXiv 2502.15543)](https://arxiv.org/abs/2502.15543)
 - [Code (GitHub)](https://github.com/OpenBMB/ParamMute)
 - [Models and data (Hugging Face collection)](https://huggingface.co/collections/chengpingan/parammute-68b9860451cba86b6cb41060)
-- [CoFaithfulQA / CoConflictQA benchmark](https://huggingface.co/datasets/chengpingan/CoConflictQA)
+- [CoFaithfulQA benchmark](https://huggingface.co/datasets/chengpingan/CoFaithfulQA)
 - [Project page](https://passionate11.github.io/ParamMute-project-page/)
 - [First author](https://passionate11.github.io/): Pengcheng Huang (Northeastern University)
 
