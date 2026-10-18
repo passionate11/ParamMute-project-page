@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ParamMute · Suppressing Knowledge-Critical FFNs for Faithful Retrieval-Augmented Generation (NeurIPS 2025)</title>
+<meta name="description" content="ParamMute (NeurIPS 2025) makes retrieval-augmented LLMs more faithful to retrieved evidence by suppressing unfaithfulness-associated FFN layers (UA-FFNs) and calibrating the model toward external knowledge. It also introduces CoFaithfulQA, a benchmark of natural knowledge conflicts." />
+<meta name="author" content="Pengcheng Huang, Zhenghao Liu, Yukun Yan, Haiyan Zhao, Xiaoyuan Yi, Hao Chen, Zhiyuan Liu, Maosong Sun, Tong Xiao, Ge Yu, Chenyan Xiong" />
+<meta name="keywords" content="ParamMute, PIP-KAG, retrieval-augmented generation, RAG faithfulness, knowledge conflict, contextual faithfulness, parametric knowledge, FFN suppression, UA-FFNs, CoFaithfulQA, CoConflictQA, ConFiQA, LLM hallucination, NeurIPS 2025" />
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
+<meta name="theme-color" content="#4f46e5" />
+<meta name="color-scheme" content="light only" />
+<link rel="canonical" href="https://passionate11.github.io/ParamMute-project-page/" />
+<link rel="author" href="https://passionate11.github.io/" />
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Pengcheng Huang" />
+<meta property="og:url" content="https://passionate11.github.io/ParamMute-project-page/" />
+<meta property="og:title" content="ParamMute: Suppressing Knowledge-Critical FFNs for Faithful Retrieval-Augmented Generation (NeurIPS 2025)" />
+<meta property="og:description" content="Mute the FFN layers that make RAG models ignore retrieved evidence: +6.17 / +54.63 average context recall over vanilla RAG on CoFaithfulQA / ConFiQA." />
+<meta property="og:image" content="https://passionate11.github.io/ParamMute-project-page/static/images/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://passionate11.github.io/ParamMute-project-page/static/images/og.png" />
+
+<!-- Bibliographic metadata (Google Scholar / Highwire Press tags) -->
+<meta name="citation_title" content="ParamMute: Suppressing Knowledge-Critical FFNs for Faithful Retrieval-Augmented Generation" />
+<meta name="citation_author" content="Huang, Pengcheng" />
+<meta name="citation_author" content="Liu, Zhenghao" />
+<meta name="citation_author" content="Yan, Yukun" />
+<meta name="citation_author" content="Zhao, Haiyan" />
+<meta name="citation_author" content="Yi, Xiaoyuan" />
+<meta name="citation_author" content="Chen, Hao" />
+<meta name="citation_author" content="Liu, Zhiyuan" />
+<meta name="citation_author" content="Sun, Maosong" />
+<meta name="citation_author" content="Xiao, Tong" />
+<meta name="citation_author" content="Yu, Ge" />
+<meta name="citation_author" content="Xiong, Chenyan" />
+<meta name="citation_publication_date" content="2025" />
+<meta name="citation_conference_title" content="Advances in Neural Information Processing Systems (NeurIPS 2025)" />
+<meta name="citation_arxiv_id" content="2502.15543" />
+<meta name="citation_pdf_url" content="https://arxiv.org/pdf/2502.15543" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%236366f1%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%237c3aed%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%279%27%20fill%3D%27url%28%23g%29%27%2F%3E%3Cg%20fill%3D%27%23fff%27%3E%3Crect%20x%3D%276%27%20y%3D%2712%27%20width%3D%274%27%20height%3D%2714%27%20rx%3D%271.5%27%2F%3E%3Crect%20x%3D%2711.5%27%20y%3D%278%27%20width%3D%274%27%20height%3D%2718%27%20rx%3D%271.5%27%20opacity%3D%27.3%27%2F%3E%3Crect%20x%3D%2717%27%20y%3D%2710%27%20width%3D%274%27%20height%3D%2716%27%20rx%3D%271.5%27%20opacity%3D%27.3%27%2F%3E%3Crect%20x%3D%2722.5%27%20y%3D%2714%27%20width%3D%274%27%20height%3D%2712%27%20rx%3D%271.5%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="static/css/style.css" />
+<!-- Fallback: if JS is disabled, the scroll-reveal animation never runs — show all content. -->
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+
+<!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+
+<!-- Structured data: the paper, its code and its benchmark, all linked to the first author's homepage entity -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://passionate11.github.io/ParamMute-project-page/#paper",
+      "name": "ParamMute: Suppressing Knowledge-Critical FFNs for Faithful Retrieval-Augmented Generation",
+      "headline": "ParamMute: Suppressing Knowledge-Critical FFNs for Faithful Retrieval-Augmented Generation",
+      "alternateName": ["ParamMute", "PIP-KAG: Mitigating Knowledge Conflicts in Knowledge-Augmented Generation via Parametric Pruning"],
+      "abstract": "Large language models (LLMs) integrated with retrieval-augmented generation (RAG) have improved factuality by grounding outputs in external evidence. However, they remain susceptible to unfaithful generation, where outputs contradict retrieved context despite its relevance and accuracy. This work identifies a subset of mid-to-deep feed-forward networks (FFNs) that are disproportionately activated in such cases and proposes Parametric Knowledge Muting through FFN Suppression (ParamMute), which suppresses the activation of these unfaithfulness-associated FFNs and calibrates the model toward retrieved knowledge. It also introduces CoFaithfulQA, a benchmark for faithfulness when internal knowledge conflicts with accurate external evidence. ParamMute significantly improves faithfulness on CoFaithfulQA and ConFiQA while substantially reducing reliance on parametric memory.",
+      "datePublished": "2025",
+      "inLanguage": "en",
+      "keywords": ["retrieval-augmented generation", "contextual faithfulness", "knowledge conflict", "parametric knowledge", "feed-forward networks", "activation suppression", "LLM hallucination"],
+      "author": [
+        { "@type": "Person", "@id": "https://passionate11.github.io/#person", "name": "Pengcheng Huang", "url": "https://passionate11.github.io/", "affiliation": { "@type": "CollegeOrUniversity", "name": "Northeastern University" } },
+        { "@type": "Person", "name": "Zhenghao Liu" },
+        { "@type": "Person", "name": "Yukun Yan" },
+        { "@type": "Person", "name": "Haiyan Zhao" },
+        { "@type": "Person", "name": "Xiaoyuan Yi" },
+        { "@type": "Person", "name": "Hao Chen" },
+        { "@type": "Person", "name": "Zhiyuan Liu" },
+        { "@type": "Person", "name": "Maosong Sun" },
+        { "@type": "Person", "name": "Tong Xiao" },
+        { "@type": "Person", "name": "Ge Yu" },
+        { "@type": "Person", "name": "Chenyan Xiong" }
+      ],
+      "isPartOf": { "@type": "CreativeWork", "name": "Advances in Neural Information Processing Systems (NeurIPS 2025)" },
+      "identifier": { "@type": "PropertyValue", "propertyID": "arXiv", "value": "2502.15543" },
+      "url": "https://passionate11.github.io/ParamMute-project-page/",
+      "image": "https://passionate11.github.io/ParamMute-project-page/static/images/og.png",
+      "sameAs": [
+        "https://arxiv.org/abs/2502.15543",
+        "https://openreview.net/forum?id=CyUq9D99vE",
+        "https://neurips.cc/virtual/2025/poster/119254"
+      ]
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "ParamMute",
+      "codeRepository": "https://github.com/OpenBMB/ParamMute",
+      "programmingLanguage": "Python",
+      "author": { "@id": "https://passionate11.github.io/#person" },
+      "subjectOf": { "@id": "https://passionate11.github.io/ParamMute-project-page/#paper" }
+    },
+    {
+      "@type": "Dataset",
+      "name": "CoFaithfulQA",
+      "alternateName": "CoConflictQA",
+      "description": "CoFaithfulQA (Consistency-filtered Contextual Faithfulness QA) is a benchmark for evaluating whether LLMs follow accurate retrieved evidence when it conflicts with their own parametric knowledge. It is built from six open-domain QA datasets (NQ, SQuAD, NewsQA, TriviaQA, SearchQA, HotpotQA) using self-consistency filtering and two-model conflict verification.",
+      "url": "https://huggingface.co/datasets/chengpingan/CoConflictQA",
+      "creator": { "@id": "https://passionate11.github.io/#person" },
+      "subjectOf": { "@id": "https://passionate11.github.io/ParamMute-project-page/#paper" }
+    }
+  ]
+}
+</script>
+</head>
+
+<body>
+
+<a class="skip-link" href="#abstract">Skip to content</a>
+
+<!-- ================= NAV ================= -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#top"><span class="brand-badge"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="navg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#navg)"/><g fill="#fff"><rect x="6" y="12" width="4" height="14" rx="1.5"/><rect x="11.5" y="8" width="4" height="18" rx="1.5" opacity=".3"/><rect x="17" y="10" width="4" height="16" rx="1.5" opacity=".3"/><rect x="22.5" y="14" width="4" height="12" rx="1.5"/></g></svg></span><span class="brand-name">ParamMute</span></a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#abstract">Abstract</a>
+      <a href="#motivation">Motivation</a>
+      <a href="#method">Method</a>
+      <a href="#benchmark">Benchmark</a>
+      <a href="#results">Results</a>
+      <a href="#faq">FAQ</a>
+      <a href="#poster">Poster</a>
+      <a href="#bibtex">BibTeX</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<a id="top"></a>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="venue-badge">NeurIPS&nbsp;2025 &nbsp;·&nbsp; Poster</div>
+    <h1 class="hero-title">ParamMute: Suppressing Knowledge-Critical FFNs for Faithful Retrieval-Augmented Generation</h1>
+    <p class="hero-subtitle">
+      RAG models still ignore correct retrieved evidence when their own memory disagrees.
+      <strong>ParamMute</strong> finds the feed-forward layers behind this and mutes them.
+    </p>
+
+    <div class="authors">
+      <span class="author"><a href="https://passionate11.github.io/" target="_blank" rel="noopener">Pengcheng Huang</a><sup>1</sup></span>
+      <span class="author"><a href="http://faculty.neu.edu.cn/liuzhenghao/zh_CN/index.htm" target="_blank" rel="noopener">Zhenghao Liu</a><sup>1,&#8727;</sup></span>
+      <span class="author">Yukun Yan<sup>2</sup></span>
+      <span class="author">Haiyan Zhao<sup>2</sup></span>
+      <span class="author">Xiaoyuan Yi<sup>3</sup></span>
+      <span class="author">Hao Chen<sup>2</sup></span>
+      <span class="author">Zhiyuan Liu<sup>2</sup></span>
+      <span class="author">Maosong Sun<sup>2</sup></span>
+      <span class="author"><a href="http://team.neu.edu.cn/NEUNLPLab/zh_CN/article/411756/content/2225.htm" target="_blank" rel="noopener">Tong Xiao</a><sup>1</sup></span>
+      <span class="author">Ge Yu<sup>1</sup></span>
+      <span class="author">Chenyan Xiong<sup>4</sup></span>
+    </div>
+    <div class="affils">
+      <span><sup>1</sup>Northeastern University, China</span>
+      <span><sup>2</sup>Tsinghua University</span>
+      <span><sup>3</sup>Microsoft Research Asia</span>
+      <span><sup>4</sup>Carnegie Mellon University</span>
+    </div>
+    <div class="corr"><sup>&#8727;</sup>Corresponding author</div>
+
+    <div class="hero-links">
+      <a class="btn btn-primary" href="https://arxiv.org/abs/2502.15543" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M4 5h16M4 12h16M4 19h10" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+        arXiv:2502.15543
+      </a>
+      <a class="btn" href="https://openreview.net/forum?id=CyUq9D99vE" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v15H5.5A1.5 1.5 0 0 0 4 20.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H12v15h6.5a1.5 1.5 0 0 1 1.5 1.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        OpenReview
+      </a>
+      <a class="btn" href="https://github.com/OpenBMB/ParamMute" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48l-.01-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.36 1.09 2.93.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85l-.01 2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z" fill="currentColor"/></svg>
+        Code
+      </a>
+      <a class="btn" href="https://huggingface.co/collections/chengpingan/parammute-68b9860451cba86b6cb41060" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" class="ic"><ellipse cx="12" cy="7" rx="7" ry="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 7v10c0 1.66 3.13 3 7 3s7-1.34 7-3V7M5 12c0 1.66 3.13 3 7 3s7-1.34 7-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        Models &amp; Data
+      </a>
+      <a class="btn" href="https://neurips.cc/virtual/2025/poster/119254" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" class="ic"><rect x="3" y="4" width="18" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 20h18" stroke="currentColor" stroke-width="1.7"/></svg>
+        NeurIPS Page
+      </a>
+      <a class="btn" href="#bibtex">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M7 7h10M7 11h10M7 15h6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+        BibTeX
+      </a>
+    </div>
+
+    <p class="tldr"><b>TL;DR</b>When a retrieval-augmented LLM contradicts correct retrieved evidence, a narrow band of
+      mid-to-deep feed-forward (FFN) layers is over-activated. ParamMute fully suppresses the eight most implicated layers
+      (the <em>UA-FFNs</em>) of LLaMA3-8B-Instruct and adds a light knowledge-preference adaptation module. Averaged over
+      subsets, context recall rises by <strong>+6.17</strong> points on CoFaithfulQA and <strong>+54.63</strong> points on ConFiQA
+      over vanilla RAG.</p>
+  </div>
+</section>
+
+<!-- ================= ABSTRACT ================= -->
+<section class="section section-alt" id="abstract">
+  <div class="container">
+    <h2 class="kicker">Abstract</h2>
+    <p class="abstract">
+      Large language models (LLMs) integrated with retrieval-augmented generation (RAG) have improved factuality by
+      grounding outputs in external evidence. However, they remain susceptible to unfaithful generation, where outputs
+      contradict retrieved context despite its relevance and accuracy. Existing approaches aiming to improve faithfulness
+      primarily focus on enhancing the utilization of external context, but often overlook the persistent influence of
+      internal parametric knowledge during generation. In this work, we investigate the internal mechanisms behind
+      unfaithful generation and identify a subset of mid-to-deep feed-forward networks (FFNs) that are disproportionately
+      activated in such cases. Building on this insight, we propose Parametric Knowledge Muting through FFN Suppression
+      (<strong>ParamMute</strong>), a framework that improves contextual faithfulness by suppressing the activation of
+      unfaithfulness-associated FFNs and calibrating the model toward retrieved knowledge. To evaluate our approach, we
+      introduce <strong>CoFaithfulQA</strong>, a benchmark specifically designed to evaluate faithfulness in scenarios where
+      internal knowledge conflicts with accurate external evidence. Experimental results show that ParamMute significantly
+      enhances faithfulness across both CoFaithfulQA and the established ConFiQA benchmark, achieving substantial reductions
+      in reliance on parametric memory. These findings underscore the importance of mitigating internal knowledge dominance
+      and provide a new direction for improving LLM trustworthiness in RAG.
+    </p>
+  </div>
+</section>
+
+<!-- ================= AT A GLANCE ================= -->
+<section class="section section-tight" id="overview">
+  <div class="container">
+    <h2 class="kicker">Highlights</h2>
+    <div class="stats">
+      <div class="stat reveal">
+        <div class="stat-num">+6.17</div>
+        <div class="stat-cap">average context recall (ConR) over vanilla RAG on CoFaithfulQA</div>
+      </div>
+      <div class="stat reveal">
+        <div class="stat-num">+54.63</div>
+        <div class="stat-cap">average ConR over vanilla RAG on the out-of-domain ConFiQA benchmark</div>
+      </div>
+      <div class="stat reveal">
+        <div class="stat-num">8<span class="u">&thinsp;/&thinsp;</span>32</div>
+        <div class="stat-cap">FFN layers of LLaMA3-8B-Instruct muted ($\lambda=0$), fixed across all datasets</div>
+      </div>
+      <div class="stat reveal">
+        <div class="stat-num">6</div>
+        <div class="stat-cap">open-domain QA sources behind the new CoFaithfulQA benchmark</div>
+      </div>
+    </div>
+
+    <h3 class="subhead">At a glance</h3>
+    <dl class="facts reveal">
+      <dt>Problem</dt><dd>Unfaithful generation in RAG: the answer contradicts relevant, accurate retrieved context because the LLM falls back on its parametric (internal) knowledge.</dd>
+      <dt>Finding</dt><dd>Unfaithful answers coincide with over-activation of a few mid-to-deep FFN layers (Unfaithfulness-Associated FFNs, UA-FFNs); suppressing them makes unfaithful answers less likely (higher NLL).</dd>
+      <dt>Method</dt><dd>Two stages: (1) suppress UA-FFN activations with a coefficient $\lambda$; (2) train a plug-and-play adaptation module with knowledge-augmented fine-tuning plus a max-margin knowledge-preference loss.</dd>
+      <dt>Benchmarks</dt><dd>CoFaithfulQA (new; natural conflicts from NQ, SQuAD, NewsQA, TriviaQA, SearchQA, HotpotQA), ConFiQA, FaithEval</dd>
+      <dt>Main backbone</dt><dd>LLaMA3-8B-Instruct; the appendix extends ParamMute to LLaMA3.2 (1B, 3B) and Qwen2.5 (0.5B to 14B) Instruct models</dd>
+      <dt>Venue</dt><dd>NeurIPS 2025 (poster). Earlier arXiv versions were titled <em>PIP-KAG: Mitigating Knowledge Conflicts in Knowledge-Augmented Generation via Parametric Pruning</em>.</dd>
+      <dt>Code &amp; data</dt><dd><a href="https://github.com/OpenBMB/ParamMute" target="_blank" rel="noopener">github.com/OpenBMB/ParamMute</a> · <a href="https://huggingface.co/collections/chengpingan/parammute-68b9860451cba86b6cb41060" target="_blank" rel="noopener">Hugging Face collection</a> (checkpoints, training data, and the benchmark)</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ================= MOTIVATION ================= -->
+<section class="section section-alt" id="motivation">
+  <div class="container">
+    <h2 class="kicker">Motivation: when internal knowledge wins</h2>
+    <p class="lead">
+      Retrieval should let an LLM answer from up-to-date evidence. In practice the model sometimes trusts what it memorized
+      instead: the retrieved document says one thing, the parametric knowledge says another, and the answer follows memory.
+      Most prior work strengthens the use of external context (prompting, context-aware decoding). ParamMute instead asks
+      <strong>where inside the model the competing internal knowledge comes from</strong>.
+    </p>
+    <figure class="figure wide reveal">
+      <img class="zoomable" src="static/images/motivation.png" width="1311" height="475" alt="A knowledge conflict in RAG: the retrieved document says NeurIPS 2025 will be held in San Diego, the model's internal knowledge says Vancouver, and an unfaithful model answers Vancouver." loading="lazy" />
+      <figcaption>A knowledge conflict. The retrieved document says <em>San Diego</em>; the model's memory says <em>Vancouver</em>. A faithful RAG model should follow the evidence.</figcaption>
+    </figure>
+
+    <h3 class="subhead">Pilot study: unfaithfulness leaves a trace in the FFNs</h3>
+    <p class="lead">
+      FFN layers act as key-value memories that store most parametric knowledge. Using the fraction of activated FFN neurons
+      per layer as a proxy for how much internal knowledge is used, we compare faithful and unfaithful responses of
+      LLaMA3-8B-Instruct on CoFaithfulQA.
+    </p>
+    <div class="fig-grid c3 pilot reveal">
+      <figure class="figure">
+        <img class="zoomable" src="static/images/fig1a_activation_gap.png" width="1400" height="869" alt="Layer-wise neuron activation ratio of faithful and unfaithful responses; unfaithful responses are more activated in mid-to-deep layers." loading="lazy" />
+        <figcaption>(a) Activation gap $\Delta R^l$: unfaithful responses activate a narrow band of mid-to-deep FFN layers more.</figcaption>
+      </figure>
+      <figure class="figure">
+        <img class="zoomable" src="static/images/fig1b_pcc.png" width="1400" height="833" alt="Pearson correlation between layer activation ratio and the unfaithful label, positive in mid-to-deep layers." loading="lazy" />
+        <figcaption>(b) Activation in these layers correlates positively with unfaithfulness ($p&lt;0.05$): the UA-FFNs.</figcaption>
+      </figure>
+      <figure class="figure">
+        <img class="zoomable" src="static/images/fig1c_causal_nll.png" width="900" height="1012" alt="Average negative log-likelihood of unfaithful responses rises when UA-FFNs are suppressed." loading="lazy" />
+        <figcaption>(c) Suppressing UA-FFNs raises the NLL of unfaithful responses: a causal role.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================= METHOD ================= -->
+<section class="section" id="method">
+  <div class="container">
+    <h2 class="kicker">Method: suppress, then adapt</h2>
+    <p class="lead">
+      ParamMute (<strong>Param</strong>etric Knowledge <strong>Mut</strong>ing through FFN Suppr<strong>e</strong>ssion) is a
+      two-stage framework built on the pilot study.
+    </p>
+    <div class="stage-grid">
+      <article class="stage-card reveal">
+        <div class="bias-tag">Stage 1</div>
+        <h3>Activation suppression of UA-FFNs</h3>
+        <p>
+          Rank all layers by the activation gap between the unfaithful subset $\mathcal{D}^-$ and the faithful subset
+          $\mathcal{D}^+$, keep the top-$N$ as $L_{\text{sup}}$, and scale their activations by a suppression coefficient
+          $\lambda\in[0,1]$. $\lambda=1$ recovers the original model; $\lambda=0$ removes these FFNs' contribution entirely.
+        </p>
+        <div class="eq">$$\Delta R^l = \mathbb{E}_{\mathcal{D}^-}\big[R^l(\hat r)\big]-\mathbb{E}_{\mathcal{D}^+}\big[R^l(\hat r)\big],\qquad \text{FFN}^l(\mathbf{x}_i^l)=\big(\lambda\cdot\sigma(\mathbf{K}^l\mathbf{x}_i^l)\big)^{\!\top}\mathbf{V}^l \;\;\text{if } l\in L_{\text{sup}}$$</div>
+        <figure class="figure inset">
+          <img class="zoomable" src="static/images/suppression.png" width="1377" height="441" alt="Selective suppression: the over-activated UA-FFN layers around layer 24 of a 32-layer model are suppressed, preventing the wrong parametric answer." loading="lazy" />
+        </figure>
+      </article>
+      <article class="stage-card violet reveal">
+        <div class="bias-tag">Stage 2</div>
+        <h3>Knowledge-augmented adaptation</h3>
+        <p>
+          A plug-and-play adaptation module (LoRA-style) is trained on the suppressed model. Knowledge-augmented training
+          rewards the correct answer given the context; knowledge preference optimization is a max-margin loss that prefers
+          answers grounded in the context $c$ over answers the model would give from the query $q$ alone.
+        </p>
+        <div class="eq">$$\mathcal{L}=\alpha\,\mathcal{L}_{\text{KAT}}+\beta\,\mathcal{L}_{\text{KPO}},\quad \mathcal{L}_{\text{KAT}}=-\log P(y^*\mid q,c),\quad \mathcal{L}_{\text{KPO}}=\big[\gamma-\log P(y^*\mid q,c)+\log P(y^*\mid q)\big]_+$$</div>
+        <figure class="figure inset">
+          <img class="zoomable" src="static/images/adaptation.png" width="1377" height="600" alt="Knowledge-augmented adaptation: the suppressed LLM is encouraged to maximize log P(y*|q,c) using external knowledge and discouraged via minimizing log P(y*|q) from internal knowledge." loading="lazy" />
+        </figure>
+      </article>
+    </div>
+    <p class="tnote">Default configuration: LLaMA3-8B-Instruct backbone, $N=8$ suppressed layers (the same set for every dataset), $\lambda=0$, $\alpha=\beta=0.5$.</p>
+  </div>
+</section>
+
+<!-- ================= BENCHMARK ================= -->
+<section class="section section-alt" id="benchmark">
+  <div class="container">
+    <h2 class="kicker">CoFaithfulQA: natural knowledge conflicts</h2>
+    <p class="lead">
+      Earlier faithfulness benchmarks mostly use synthetic counterfactual contexts that contradict a known-correct answer.
+      <strong>CoFaithfulQA</strong> (<strong>Co</strong>nsistency-filtered Contextual <strong>Faithful</strong>ness
+      <strong>QA</strong>) instead captures conflicts that occur naturally between a model's own belief and accurate evidence.
+    </p>
+    <div class="prose">
+      <ol>
+        <li><strong>Parametric knowledge elicitation.</strong> Ask the model each question closed-book $n$ times and keep its
+          majority answer as its dominant belief; questions whose majority answer appears fewer than $n/2$ times are discarded.</li>
+        <li><strong>Conflict detection.</strong> GPT-4o and GLM-4-plus judge whether that belief conflicts with the evidence and
+          the ground truth; an instance is kept only when both agree. A subset is manually verified.</li>
+        <li><strong>Labels.</strong> Each example carries a faithfulness label, giving a faithful subset $\mathcal{D}^+$ and an
+          unfaithful subset $\mathcal{D}^-$; evaluation uses $\mathcal{D}^-$.</li>
+      </ol>
+    </div>
+    <div class="table-scroll reveal">
+      <table class="rtab" style="min-width:480px">
+        <thead><tr><th class="lcol">Source dataset</th><th>#Full (dedup.)</th><th>#Faithful ($\mathcal{D}^+$)</th><th>#Unfaithful ($\mathcal{D}^-$)</th></tr></thead>
+        <tbody>
+          <tr><td class="lcol">HotpotQA</td><td>5,901</td><td>1,546</td><td>1,427</td></tr>
+          <tr><td class="lcol">NewsQA</td><td>4,212</td><td>374</td><td>886</td></tr>
+          <tr><td class="lcol">NQ</td><td>7,314</td><td>3,010</td><td>572</td></tr>
+          <tr><td class="lcol">SearchQA</td><td>16,980</td><td>10,692</td><td>1,441</td></tr>
+          <tr><td class="lcol">SQuAD</td><td>10,490</td><td>2,799</td><td>2,225</td></tr>
+          <tr><td class="lcol">TriviaQA</td><td>7,785</td><td>5,887</td><td>767</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tnote">The test data is on Hugging Face as <a href="https://huggingface.co/datasets/chengpingan/CoConflictQA" target="_blank" rel="noopener">chengpingan/CoConflictQA</a> (the benchmark's earlier name).</p>
+  </div>
+</section>
+
+<!-- ================= RESULTS ================= -->
+<section class="section" id="results">
+  <div class="container">
+    <h2 class="kicker">Experimental results</h2>
+    <p class="lead">
+      Metrics: context recall <strong>ConR&nbsp;&uarr;</strong> (answer matches the retrieved context), memory recall
+      <strong>MemR&nbsp;&darr;</strong> (answer matches the model's parametric answer), and memorization ratio
+      <strong>MR&nbsp;=&nbsp;MemR&nbsp;/&nbsp;(MemR&nbsp;+&nbsp;ConR)&nbsp;&darr;</strong>. All methods use LLaMA3-8B-Instruct.
+    </p>
+
+    <h3 class="subhead">CoFaithfulQA (in-domain)</h3>
+    <div class="table-scroll reveal">
+      <table class="rtab">
+        <thead>
+          <tr><th class="lcol" rowspan="2">Method</th><th colspan="3">HotpotQA</th><th colspan="3">NQ</th><th colspan="3">NewsQA</th></tr>
+          <tr><th>ConR</th><th>MemR</th><th>MR</th><th>ConR</th><th>MemR</th><th>MR</th><th>ConR</th><th>MemR</th><th>MR</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="lcol">Vanilla-RAG</td><td>60.34</td><td>13.88</td><td>18.70</td><td>53.09</td><td>14.41</td><td>21.35</td><td>60.27</td><td>8.24</td><td>12.03</td></tr>
+          <tr class="grouprow"><td colspan="10">Prompting &amp; decoding</td></tr>
+          <tr><td class="lcol">Attr<sub>prompt</sub></td><td>58.93</td><td>13.95</td><td>19.13</td><td>55.36</td><td>11.07</td><td>16.67</td><td>58.80</td><td>7.56</td><td>11.39</td></tr>
+          <tr><td class="lcol">O&amp;I<sub>prompt</sub></td><td>47.79</td><td>10.72</td><td>18.32</td><td>49.25</td><td class="best">8.23</td><td>14.32</td><td>52.03</td><td>5.30</td><td>9.25</td></tr>
+          <tr><td class="lcol">COIECD</td><td>62.51</td><td>12.19</td><td>16.32</td><td>56.21</td><td>12.28</td><td>17.93</td><td>51.81</td><td>6.21</td><td>10.70</td></tr>
+          <tr class="grouprow"><td colspan="10">Fine-tuning &amp; alignment</td></tr>
+          <tr><td class="lcol">SFT</td><td>70.92</td><td>6.24</td><td>8.08</td><td>59.76</td><td>10.29</td><td>14.69</td><td>61.96</td><td>5.08</td><td>7.58</td></tr>
+          <tr><td class="lcol">KAFT</td><td>69.52</td><td>6.87</td><td>8.99</td><td>60.89</td><td>9.23</td><td>13.16</td><td>65.09</td><td class="best">4.74</td><td class="best">6.79</td></tr>
+          <tr><td class="lcol">C-DPO</td><td>67.20</td><td>7.64</td><td>10.21</td><td>62.24</td><td>9.79</td><td>13.60</td><td>61.40</td><td class="best">4.74</td><td>7.17</td></tr>
+          <tr><td class="lcol">DDR</td><td>68.66</td><td>7.15</td><td>9.43</td><td class="best">63.29</td><td>10.33</td><td>14.03</td><td>64.74</td><td>5.03</td><td>7.21</td></tr>
+          <tr class="ours-row"><td class="lcol">ParamMute</td><td class="best">71.06</td><td class="best">6.17</td><td class="best">7.99</td><td>60.68</td><td>9.08</td><td class="best">13.02</td><td class="best">65.24</td><td>4.85</td><td>6.92</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-scroll reveal" style="margin-top:18px">
+      <table class="rtab">
+        <thead>
+          <tr><th class="lcol" rowspan="2">Method</th><th colspan="3">SearchQA</th><th colspan="3">SQuAD</th><th colspan="3">TriviaQA</th></tr>
+          <tr><th>ConR</th><th>MemR</th><th>MR</th><th>ConR</th><th>MemR</th><th>MR</th><th>ConR</th><th>MemR</th><th>MR</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="lcol">Vanilla-RAG</td><td>66.76</td><td>10.55</td><td>13.64</td><td>77.93</td><td>6.79</td><td>8.01</td><td>61.80</td><td>11.47</td><td>15.66</td></tr>
+          <tr class="grouprow"><td colspan="10">Prompting &amp; decoding</td></tr>
+          <tr><td class="lcol">Attr<sub>prompt</sub></td><td>62.53</td><td>10.55</td><td>14.43</td><td>77.35</td><td>6.38</td><td>7.62</td><td>59.97</td><td>10.43</td><td>14.81</td></tr>
+          <tr><td class="lcol">O&amp;I<sub>prompt</sub></td><td>52.26</td><td>9.23</td><td>15.01</td><td>76.81</td><td>6.11</td><td>7.37</td><td>55.41</td><td>8.08</td><td>12.73</td></tr>
+          <tr><td class="lcol">COIECD</td><td>69.74</td><td>11.66</td><td>14.32</td><td>73.12</td><td>7.64</td><td>9.46</td><td class="best">63.62</td><td>11.99</td><td>15.86</td></tr>
+          <tr class="grouprow"><td colspan="10">Fine-tuning &amp; alignment</td></tr>
+          <tr><td class="lcol">SFT</td><td>75.29</td><td>6.87</td><td>8.36</td><td>79.19</td><td>4.22</td><td>5.06</td><td>59.60</td><td>8.34</td><td>12.38</td></tr>
+          <tr><td class="lcol">KAFT</td><td>77.38</td><td>7.43</td><td>8.76</td><td>80.04</td><td>4.18</td><td>4.96</td><td>62.32</td><td>8.74</td><td>12.29</td></tr>
+          <tr><td class="lcol">C-DPO</td><td>64.12</td><td class="best">5.62</td><td>8.06</td><td>80.08</td><td>5.26</td><td>6.16</td><td>58.67</td><td>8.74</td><td>12.96</td></tr>
+          <tr><td class="lcol">DDR</td><td>78.07</td><td>6.48</td><td>7.66</td><td class="best">81.36</td><td>4.75</td><td>5.52</td><td>60.71</td><td>7.73</td><td>11.29</td></tr>
+          <tr class="ours-row"><td class="lcol">ParamMute</td><td class="best">78.76</td><td>6.04</td><td class="best">7.12</td><td>80.58</td><td class="best">4.04</td><td class="best">4.78</td><td>60.89</td><td class="best">6.91</td><td class="best">10.19</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tnote"><span class="chip best-chip">Bold</span> = best in each column. Averaged over the six subsets, ParamMute raises ConR by 6.17 points and lowers MemR from 10.89 to 6.18 compared with vanilla RAG. Prompting and decoding methods tend to lower MemR at the cost of ConR; ParamMute improves both.</p>
+
+    <h3 class="subhead">ConFiQA (out-of-domain)</h3>
+    <div class="table-scroll reveal">
+      <table class="rtab">
+        <thead>
+          <tr><th class="lcol" rowspan="2">Method</th><th colspan="3">Question Answering</th><th colspan="3">Multi-hop Reasoning</th><th colspan="3">Multi-Conflicts</th></tr>
+          <tr><th>ConR</th><th>MemR</th><th>MR</th><th>ConR</th><th>MemR</th><th>MR</th><th>ConR</th><th>MemR</th><th>MR</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="lcol">Vanilla-RAG</td><td>26.24</td><td>38.51</td><td>59.47</td><td>14.87</td><td>24.98</td><td>62.69</td><td>4.49</td><td>13.53</td><td>75.09</td></tr>
+          <tr class="grouprow"><td colspan="10">Prompting &amp; decoding</td></tr>
+          <tr><td class="lcol">Attr<sub>prompt</sub></td><td>47.33</td><td>25.78</td><td>35.26</td><td>17.69</td><td>22.42</td><td>55.90</td><td>6.60</td><td>14.67</td><td>68.97</td></tr>
+          <tr><td class="lcol">O&amp;I<sub>prompt</sub></td><td>66.22</td><td>13.69</td><td>17.13</td><td>16.78</td><td>17.18</td><td>50.59</td><td>11.64</td><td>12.60</td><td>51.97</td></tr>
+          <tr><td class="lcol">COIECD</td><td>71.69</td><td>15.33</td><td>17.62</td><td>53.36</td><td>17.13</td><td>24.31</td><td>57.11</td><td>9.60</td><td>14.39</td></tr>
+          <tr class="grouprow"><td colspan="10">Fine-tuning &amp; alignment</td></tr>
+          <tr><td class="lcol">SFT</td><td>78.02</td><td>5.02</td><td>6.05</td><td>61.40</td><td>13.47</td><td>17.99</td><td>61.98</td><td>9.54</td><td>13.34</td></tr>
+          <tr><td class="lcol">KAFT</td><td class="best">82.04</td><td>5.58</td><td>6.36</td><td class="best">63.71</td><td>13.64</td><td>17.63</td><td class="best">67.31</td><td>9.98</td><td>12.91</td></tr>
+          <tr><td class="lcol">C-DPO</td><td>81.82</td><td>6.20</td><td>7.04</td><td>58.89</td><td>14.00</td><td>19.21</td><td>58.24</td><td class="best">8.71</td><td>13.01</td></tr>
+          <tr><td class="lcol">DDR</td><td>80.71</td><td>6.07</td><td>6.99</td><td>60.64</td><td>15.60</td><td>20.46</td><td>61.07</td><td>8.93</td><td>12.76</td></tr>
+          <tr class="ours-row"><td class="lcol">ParamMute</td><td>81.20</td><td class="best">3.69</td><td class="best">4.35</td><td>63.09</td><td class="best">12.82</td><td class="best">16.89</td><td>65.20</td><td>9.29</td><td class="best">12.47</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tnote">Averaged over the three subsets, ParamMute raises ConR from 15.20 to 69.83 (+54.63) and lowers MemR from 25.67 to 8.60, with the lowest memorization ratio on every subset. Results on FaithEval are in the paper's appendix.</p>
+
+    <h3 class="subhead">What matters: ablations</h3>
+    <ul class="takeaways">
+      <li class="reveal"><span class="tk-num">1</span><div><strong>FFNs are the right place to intervene.</strong> Suppressing UA-FFN sublayers beats suppressing multi-head attention sublayers, knowledge-related parameters, or whole transformer layers.</div></li>
+      <li class="reveal"><span class="tk-num">2</span><div><strong>The selected FFNs matter.</strong> Suppressing bottom-layer FFNs sharply lowers ConR; middle-layer or randomly chosen FFNs help less than the UA-FFNs that ParamMute selects.</div></li>
+      <li class="reveal"><span class="tk-num">3</span><div><strong>Both stages contribute.</strong> Removing suppression raises MemR by about 0.8 points; removing adaptation lowers ConR by about 1 point.</div></li>
+    </ul>
+
+    <h3 class="subhead">Hyperparameters</h3>
+    <div class="fig-grid c3 reveal">
+      <figure class="figure">
+        <img class="zoomable" src="static/images/hyper_lambda.png" width="900" height="720" alt="ConR and MemR versus suppression coefficient lambda from 0 to 1." loading="lazy" />
+        <figcaption>Suppression coefficient $\lambda$: smaller values lower MemR and raise ConR; full suppression ($\lambda=0$) works best.</figcaption>
+      </figure>
+      <figure class="figure">
+        <img class="zoomable" src="static/images/hyper_topn.png" width="1000" height="606" alt="ConR and MemR versus number of suppressed FFN layers N from 1 to 15." loading="lazy" />
+        <figcaption>Number of suppressed layers $N$: more layers keep lowering MemR, but ConR drops sharply once $N$ reaches 10.</figcaption>
+      </figure>
+      <figure class="figure">
+        <img class="zoomable" src="static/images/hyper_loss.png" width="900" height="643" alt="ConR and MemR for different alpha to beta ratios." loading="lazy" />
+        <figcaption>Loss weights $\alpha:\beta$ have limited impact; $\alpha=\beta=0.5$ gives a good balance.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ANALYSIS ================= -->
+<section class="section section-alt" id="analysis">
+  <div class="container">
+    <h2 class="kicker">Does ParamMute change how the model uses knowledge?</h2>
+    <p class="lead">
+      On the unfaithful subset $\mathcal{D}^-$ we compare the vanilla LLM, the <em>Suppressed</em> model (ParamMute without
+      adaptation) and full ParamMute.
+    </p>
+    <div class="fig-grid c4 reveal">
+      <figure class="figure">
+        <img class="zoomable" src="static/images/analysis_sim_parametric.png" width="900" height="664" alt="Similarity of responses with the parametric answer: Vanilla 1.00, Vanilla-RAG 0.63, Suppressed 0.49, ParamMute 0.59." loading="lazy" />
+        <figcaption>Similarity to the model's parametric answer: lowest for the Suppressed model (0.49).</figcaption>
+      </figure>
+      <figure class="figure">
+        <img class="zoomable" src="static/images/analysis_sim_context.png" width="900" height="664" alt="Similarity of responses with the contextual answer: Vanilla 0.58, Vanilla-RAG 0.81, Suppressed 0.63, ParamMute 0.91." loading="lazy" />
+        <figcaption>Similarity to the contextual answer: highest for ParamMute (0.91 vs. 0.81 for vanilla RAG).</figcaption>
+      </figure>
+      <figure class="figure">
+        <img class="zoomable" src="static/images/analysis_ppl_without_context.png" width="900" height="661" alt="Perplexity of reproducing the ground-truth answer without context." loading="lazy" />
+        <figcaption>Perplexity of the ground-truth answer <em>without</em> context: suppression raises it, i.e. less reliance on memory.</figcaption>
+      </figure>
+      <figure class="figure">
+        <img class="zoomable" src="static/images/analysis_ppl_with_context.png" width="900" height="661" alt="Perplexity of reproducing the ground-truth answer with context." loading="lazy" />
+        <figcaption>Perplexity <em>with</em> context: ParamMute is confident only when the evidence is present.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="section" id="faq">
+  <div class="container">
+    <h2 class="kicker">FAQ</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <h3>What is ParamMute?</h3>
+        <p>ParamMute (Parametric Knowledge Muting through FFN Suppression) is a method from the NeurIPS 2025 paper by Pengcheng Huang et al. It makes retrieval-augmented LLMs answer from the retrieved evidence instead of conflicting internal memory by suppressing the feed-forward layers most associated with unfaithful answers and then training a small adaptation module that prefers context-grounded answers.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What are UA-FFNs?</h3>
+        <p>Unfaithfulness-Associated FFNs: a small set of mid-to-deep feed-forward layers whose neuron activation ratio is higher for unfaithful responses than for faithful ones and correlates positively with unfaithfulness. Suppressing them increases the negative log-likelihood of unfaithful responses, which is evidence that they play a causal role.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How is ParamMute different from prompting, context-aware decoding, or DPO-style alignment?</h3>
+        <p>Prompting (Attr<sub>prompt</sub>, O&amp;I<sub>prompt</sub>) and context-aware decoding (COIECD) work only on the input or output side; on CoFaithfulQA they tend to lower memory recall but also lower context recall. Fine-tuning and alignment baselines (SFT, KAFT, Context-DPO, DDR) adjust parameters but do not target where parametric knowledge is expressed. ParamMute first mutes the internal pathway (UA-FFNs) and then adapts the model, and it generally outperforms these baselines.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What is CoFaithfulQA, and how is it different from counterfactual benchmarks?</h3>
+        <p>CoFaithfulQA is a benchmark introduced in the paper, built from NQ, SQuAD, NewsQA, TriviaQA, SearchQA and HotpotQA. Instead of injecting synthetic counterfactual contexts, it keeps questions where the model's own self-consistent closed-book answer genuinely conflicts with accurate evidence, as judged by both GPT-4o and GLM-4-plus. Its data is released on Hugging Face under the earlier name CoConflictQA.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Which models has ParamMute been tested on?</h3>
+        <p>The main experiments use LLaMA3-8B-Instruct. The appendix applies ParamMute to LLaMA3.2-1B/3B-Instruct and Qwen2.5-0.5B, 1.5B, 3B, 7B and 14B-Instruct; it improves over vanilla RAG for every model. Larger models tend to rely more on parametric memory, and ParamMute brings their memory recall down.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is ParamMute the same work as PIP-KAG?</h3>
+        <p>Yes. Earlier arXiv versions of arXiv:2502.15543 were titled "PIP-KAG: Mitigating Knowledge Conflicts in Knowledge-Augmented Generation via Parametric Pruning". The NeurIPS 2025 version is titled "ParamMute: Suppressing Knowledge-Critical FFNs for Faithful Retrieval-Augmented Generation".</p>
+      </div>
+      <div class="faq-item">
+        <h3>Where are the code and data?</h3>
+        <p>Code: <a href="https://github.com/OpenBMB/ParamMute" target="_blank" rel="noopener">github.com/OpenBMB/ParamMute</a>. Checkpoints, training data and the benchmark: the <a href="https://huggingface.co/collections/chengpingan/parammute-68b9860451cba86b6cb41060" target="_blank" rel="noopener">ParamMute collection on Hugging Face</a>. Questions: pengcheng.neu@outlook.com.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 中文简介 ================= -->
+<section class="section section-alt" id="zh" lang="zh-CN">
+  <div class="container zh-summary">
+    <h2 class="kicker">中文简介</h2>
+    <p><strong>ParamMute：通过抑制知识关键的前馈层实现忠实的检索增强生成</strong>（NeurIPS 2025），第一作者为东北大学黄鹏程（Pengcheng Huang），通讯作者为刘正皓，合作单位包括清华大学、微软亚洲研究院和卡内基梅隆大学。</p>
+    <p>检索增强生成（RAG）中，即使检索到的文档准确且相关，大模型仍可能依据自身参数中记忆的知识作答，与上下文矛盾，这称为“不忠实生成”或知识冲突。论文发现，不忠实回答出现时，模型中后层的一小部分前馈网络（FFN）激活明显偏高，并通过相关性分析和因果干预验证了这一点，将这些层称为 UA-FFNs（与不忠实相关的 FFN）。</p>
+    <p>ParamMute 分两步：先抑制 UA-FFNs 的激活（LLaMA3-8B-Instruct 上抑制 8 层，系数 λ=0），削弱参数知识的干扰；再训练一个即插即用的适配模块，用知识增强训练和最大间隔的知识偏好损失，让模型更依赖外部证据。论文同时构建了 <strong>CoFaithfulQA</strong> 基准（Hugging Face 上名为 CoConflictQA），从 NQ、SQuAD、NewsQA、TriviaQA、SearchQA、HotpotQA 六个数据集中筛选模型自身知识与证据真实冲突的样本。</p>
+    <p>实验中，相比普通 RAG，ParamMute 在 CoFaithfulQA 上平均上下文召回率（ConR）提升 6.17 个点、参数记忆召回率（MemR）从 10.89 降到 6.18；在 ConFiQA 上 ConR 平均提升 54.63 个点。该工作的 arXiv 早期版本标题为 PIP-KAG。代码见 GitHub OpenBMB/ParamMute。</p>
+  </div>
+</section>
+
+<!-- ================= POSTER ================= -->
+<section class="section" id="poster">
+  <div class="container">
+    <h2 class="kicker">NeurIPS 2025 poster</h2>
+    <figure class="figure poster-fig reveal">
+      <img class="zoomable" src="static/images/poster_web.jpg" width="1800" height="1200" data-zoom="static/images/poster.jpg" alt="ParamMute NeurIPS 2025 poster: motivation, FFN activation analysis, method, and results." loading="lazy" />
+      <figcaption>Click to zoom. Slides: <a href="https://neurips.cc/media/neurips-2025/Slides/119254.pdf" target="_blank" rel="noopener">NeurIPS 2025 slides (PDF)&nbsp;&rarr;</a></figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= BIBTEX ================= -->
+<section class="section section-alt" id="bibtex">
+  <div class="container">
+    <h2 class="kicker">BibTeX</h2>
+    <div class="bib-wrap reveal">
+      <button class="copy-btn" id="copyBib" aria-label="Copy BibTeX">Copy</button>
+      <pre id="bibText">@inproceedings{huang2025parammute,
+  title     = {{ParamMute}: Suppressing Knowledge-Critical {FFN}s for Faithful Retrieval-Augmented Generation},
+  author    = {Huang, Pengcheng and Liu, Zhenghao and Yan, Yukun and Zhao, Haiyan and Yi, Xiaoyuan and Chen, Hao and Liu, Zhiyuan and Sun, Maosong and Xiao, Tong and Yu, Ge and Xiong, Chenyan},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2025},
+  url       = {https://openreview.net/forum?id=CyUq9D99vE}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="container narrow">
+    <p class="foot-links">
+      <a href="https://arxiv.org/abs/2502.15543" target="_blank" rel="noopener">arXiv</a> ·
+      <a href="https://openreview.net/forum?id=CyUq9D99vE" target="_blank" rel="noopener">OpenReview</a> ·
+      <a href="https://github.com/OpenBMB/ParamMute" target="_blank" rel="noopener">Code</a> ·
+      <a href="https://huggingface.co/collections/chengpingan/parammute-68b9860451cba86b6cb41060" target="_blank" rel="noopener">Hugging Face</a> ·
+      <a href="mailto:pengcheng.neu@outlook.com">Contact</a>
+    </p>
+    <p class="foot-meta">More from the first author, <a href="https://passionate11.github.io/">Pengcheng Huang</a>:</p>
+    <ul class="related">
+      <li><a href="https://passionate11.github.io/Uncode-project-page/">UNCODE: Empirical Analysis of Decoding Biases in Masked Diffusion Models</a> (ACL 2026)</li>
+      <li><a href="https://passionate11.github.io/Translate-and-Revise-project-page/">Translate-and-Revise: Boosting Large Language Models for Constrained Translation</a> (CCL 2024)</li>
+    </ul>
+    <p class="foot-fine">Project page for "ParamMute: Suppressing Knowledge-Critical FFNs for Faithful Retrieval-Augmented Generation" (NeurIPS 2025).</p>
+  </div>
+</footer>
+
+<!-- back to top -->
+<button class="to-top" id="toTop" aria-label="Back to top" title="Back to top">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6M6 12l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+
+<!-- lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged figure" aria-hidden="true" tabindex="-1">
+  <img src="" alt="" id="lightboxImg" />
+</div>
+
+<script src="static/js/main.js"></script>
+</body>
+</html>
