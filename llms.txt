@@ -10,7 +10,8 @@
 
 ## Links
 
-- [Paper (OpenReview, NeurIPS 2025)](https://openreview.net/forum?id=CyUq9D99vE)
+- [Paper (NeurIPS 2025 proceedings, DOI 10.52202/085713-3356)](https://proceedings.neurips.cc/paper_files/paper/2025/hash/90d1e515d74686ad148b469a3cecbbaa-Abstract-Conference.html)
+- [OpenReview discussion](https://openreview.net/forum?id=CyUq9D99vE)
 - [Paper (arXiv 2502.15543)](https://arxiv.org/abs/2502.15543)
 - [Code (GitHub)](https://github.com/OpenBMB/ParamMute)
 - [Models and data (Hugging Face collection)](https://huggingface.co/collections/chengpingan/parammute-68b9860451cba86b6cb41060)
@@ -25,7 +26,9 @@
   title     = {{ParamMute}: Suppressing Knowledge-Critical {FFN}s for Faithful Retrieval-Augmented Generation},
   author    = {Huang, Pengcheng and Liu, Zhenghao and Yan, Yukun and Zhao, Haiyan and Yi, Xiaoyuan and Chen, Hao and Liu, Zhiyuan and Sun, Maosong and Xiao, Tong and Yu, Ge and Xiong, Chenyan},
   booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {38},
   year      = {2025},
-  url       = {https://openreview.net/forum?id=CyUq9D99vE}
+  doi       = {10.52202/085713-3356},
+  url       = {https://proceedings.neurips.cc/paper_files/paper/2025/hash/90d1e515d74686ad148b469a3cecbbaa-Abstract-Conference.html}
 }
 ```
